@@ -13,69 +13,85 @@ manager = SpotifyClientCredentials(client_id,client_secret)
 sp = spotipy.Spotify(client_credentials_manager=manager)
 
 
-url_base = 'http://localhost:8083'
+url_base = 'http://40.78.153.176:8082'
 
 #Retrieve data from server
 
 def get_song_from_redis(ids):
-	r=request.get(url_base+"/api/track/"+ids)
-	if 'content-length' in r.headers.keys() and r.headers['content-length']=='0':
-		return {}
+	try:
+		r=request.get(url_base+"/api/track/"+ids)
+		if 'content-length' in r.headers.keys() and r.headers['content-length']=='0':
+			return {}
 
-	meta=r.json()
-	name = meta['name']
-	album = meta['album_name']
-	artist = meta['album_artists_name']
-	release_date = meta['release_date']
-	length = meta['duration_ms']
-	popularity = meta['popularity']
-	ids =  meta['id']
-
-	return meta
+		meta=r.json()
+		name = meta['name']
+		album = meta['album_name']
+		artist = meta['album_artists_name']
+		release_date = meta['release_date']
+		length = meta['duration_ms']
+		popularity = meta['popularity']
+		ids =  meta['id']
+		return meta
+	except:
+		pass
 
 def get_trackmood_from_redis(ids):
-	r=request.get(url_base+"/api/trackmood/"+ids)
-	if 'content-length' in r.headers.keys() and r.headers['content-length']=='0':
-		return {}
+	try:
+		r=request.get(url_base+"/api/trackmood/"+ids)
+		if 'content-length' in r.headers.keys() and r.headers['content-length']=='0':
+			return {}
 
-	return r.json()
+		return r.json()
+	except:
+		pass
 
 def get_audiofeatures_from_redis(ids):
-	r=request.get(url_base+"/api/audiofeatures/"+ids)
+	try:
+		r=request.get(url_base+"/api/audiofeatures/"+ids)
 
-	if 'content-length' in r.headers.keys() and r.headers['content-length']=='0':
-		return {}
+		if 'content-length' in r.headers.keys() and r.headers['content-length']=='0':
+			return {}
 
-	features=r.json()
+		features=r.json()
 
-	acousticness = features['acousticness']
-	danceability = features['danceability']
-	energy = features['energy']
-	instrumentalness = features['instrumentalness']
-	liveness = features['liveness']
-	valence = features['valence']
-	loudness = features['loudness']
-	speechiness = features['speechiness']
-	tempo = features['tempo']
-	key = features['key']
-	time_signature = features['time_signature']
+		acousticness = features['acousticness']
+		danceability = features['danceability']
+		energy = features['energy']
+		instrumentalness = features['instrumentalness']
+		liveness = features['liveness']
+		valence = features['valence']
+		loudness = features['loudness']
+		speechiness = features['speechiness']
+		tempo = features['tempo']
+		key = features['key']
+		time_signature = features['time_signature']
 
-	return features
+		return features
+	except:
+		pass
 
 #Post data to server
 def post_song_to_redis(track):
-    pload={'name':track['name'],'album_artists_name': track['album_artists_name'],'album_name':track['album_name'],'duration_ms':track['duration_ms'],'id':track['id'],'popularity':track['popularity'],'release_date':track['release_date']}
-    r=request.post(url_base+"/api/track/",json=pload)
+	try:
+		pload={'name':track['name'],'album_artists_name': track['album_artists_name'],'album_name':track['album_name'],'duration_ms':track['duration_ms'],'id':track['id'],'popularity':track['popularity'],'release_date':track['release_date']}
+		r=request.post(url_base+"/api/track/",json=pload)
+	except:
+		pass
 
 def post_trackmood_to_redis(mood):
-	pload={"id": mood['url_song'],"mood":mood['mood']}
-	r=request.post(url_base+"/api/trackmood/",json=pload)
+	try:
+		pload={"id": mood['url_song'],"mood":mood['mood']}
+		r=request.post(url_base+"/api/trackmood/",json=pload)
+	except:
+		pass
 
 def post_audio_features_to_redis(audiofeatures):
-    pload={"acousticness": audiofeatures['acousticness'],
-"danceability": audiofeatures['danceability'],"energy": audiofeatures['energy'],"instrumentalness": audiofeatures['instrumentalness'],"key": audiofeatures['key'],"liveness": audiofeatures['liveness'],"loudness": audiofeatures['loudness'],"speechiness": audiofeatures['speechiness'],"tempo": audiofeatures['tempo'],"time_signature": audiofeatures['time_signature'],"uri_song": audiofeatures['uri_song'],"valence": audiofeatures['valence']}
-    r=request.post(url_base+"/api/audiofeatures/",json=pload)
-
+	try:
+		pload={"acousticness": audiofeatures['acousticness'],
+	"danceability": audiofeatures['danceability'],"energy": audiofeatures['energy'],"instrumentalness": audiofeatures['instrumentalness'],"key": audiofeatures['key'],"liveness": audiofeatures['liveness'],"loudness": audiofeatures['loudness'],"speechiness": audiofeatures['speechiness'],"tempo": audiofeatures['tempo'],"time_signature": audiofeatures['time_signature'],"uri_song": audiofeatures['uri_song'],"valence": audiofeatures['valence']}
+		r=request.post(url_base+"/api/audiofeatures/",json=pload)
+	except:
+		pass
 
 def get_song_from_api(ids):
 	meta = sp.track(ids)
@@ -155,13 +171,14 @@ def get_songs_features(ids):
 
 
 def predict_song_mood(ids,model):
+	prediction=''
 	resp=get_trackmood_from_redis(ids)
 	if not resp:
 		prediction=model.predict_mood(ids)
 		post_trackmood_to_redis({'url_song':ids,'mood':prediction})
-		resp=prediction	
-	return {'id':ids,'mood':prediction}
+		resp={'url_song':ids,'mood':prediction}
+	return resp
 
 		
 
-print(get_songs_features("2H7PHVdQ3mXqEHXcvclTB0"))
+#print(get_songs_2H7PHVdQ3mXqEHXcvclTB0("features"))

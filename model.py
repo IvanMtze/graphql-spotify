@@ -44,8 +44,8 @@ class MoodsPredicter():
 
 		self.X_train,self.X_test,self.Y_train,self.Y_test = train_test_split(self.X,self.encoded_y,test_size=0.2,random_state=15)
 
-		target = pd.DataFrame({'mood':self.df['mood'].tolist(),'encode':self.encoded_y}).drop_duplicates().sort_values(['encode'],ascending=True)
-		target
+		self.target = pd.DataFrame({'mood':self.df['mood'].tolist(),'encode':self.encoded_y}).drop_duplicates().sort_values(['encode'],ascending=True)
+		
 
 	def base_model(self):
 		#Modelo
@@ -65,7 +65,7 @@ class MoodsPredicter():
 		#Evalua el modelo usando KFold cross validation
 		self.kfold = KFold(n_splits=10,shuffle=True)
 		self.results = cross_val_score(estimator,X,encoded_y,cv=kfold)
-		print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100,results.std()*100))
+		#print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100,results.std()*100))
 
 		self.estimator.fit(self.X_train,self.Y_train)
 		self.y_preds = self.estimator.predict(self.X_test)
@@ -81,7 +81,7 @@ class MoodsPredicter():
 		self.ax.set_title('Confusion Matrix')
 		self.ax.xaxis.set_ticklabels(self.labels)
 		self.ax.yaxis.set_ticklabels(self.labels)
-		plt.show()
+		#plt.show()
 
 
 	def predict_mood(self,id_song):
@@ -102,8 +102,8 @@ class MoodsPredicter():
 		mood = np.array(self.target['mood'][self.target['encode']==int(results)])
 		name_song = preds[0][0]
 		artist = preds[0][2]
-		return print("{0} by {1} is a {2} song".format(name_song,artist,mood[0].upper()))
+		return str(mood[0].upper())
 
 #print("Accuracy Score",accuracy_score(Y_test,y_preds))
-mp = MoodsPredicter()
-print(mp.predict_mood('8idjfkdfsdf'))
+#smp = MoodsPredicter()
+#print(mp.predict_mood('2H7PHVdQ3mXqEHXcvclTB0'))

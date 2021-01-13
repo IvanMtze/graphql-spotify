@@ -5,3 +5,7 @@ matplotlib
 seaborn
 keras
 tensorflow
+Flask
+graphene
+flask-graphql
+install graphene

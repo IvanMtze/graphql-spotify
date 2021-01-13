@@ -6,7 +6,7 @@ class Resolver():
 		self.model=MoodsPredicter()
 
 	def get_prediction_song(self,ids):
-		resp=predict_song_mood(ids,model)
+		resp=predict_song_mood(ids,self.model)
 		return resp
 
 
